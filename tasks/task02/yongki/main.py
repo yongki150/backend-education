@@ -4,8 +4,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.common import exceptions
 import os.path
 
-scriptpath = os.path.dirname(__file__)
-filename = os.path.join(scriptpath, '/drivers/chromedriver.exe')
+filename = os.path.join(os.path.dirname(__file__), './drivers/chromedriver.exe')
 
 # webdriver 객체생성
 driver = webdriver.Chrome(filename)
@@ -30,6 +29,3 @@ def login(user_id, user_pw):
     except exceptions.StaleElementReferenceException as e:
         element = driver.find_element_by_xpath("//button[@jsname='LgbsSe']")
         element.send_keys((Keys.ENTER))
-
-login('', '')
-
