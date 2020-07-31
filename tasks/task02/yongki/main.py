@@ -1,11 +1,3 @@
-"""
-참고자료
-https://beomi.github.io/2017/02/27/HowToMakeWebCrawler-With-Selenium/ selenium 전반적인 가이드
-https://wkdtjsgur100.github.io/selenium-does-not-work-to-click/ click이슈 해결
-https://stackoverflow.com/questions/18225997/stale-element-reference-element-is-not-attached-to-the-page-document
-stale이유 해결
-"""
-
 # Selenium은 webdriver api를 통해 브라우저를 제어
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -39,5 +31,5 @@ def login(user_id, user_pw):
         element = driver.find_element_by_xpath("//button[@jsname='LgbsSe']")
         element.send_keys((Keys.ENTER))
 
-login('ygflove@bible.ac.kr', '@yg96247890')
+login('', '')
 
