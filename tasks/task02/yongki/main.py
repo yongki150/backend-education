@@ -21,10 +21,8 @@ def login(user_id, user_pw):
     driver.implicitly_wait(3) # 웹자원들이 로드될때까지 시간조정 3초
     driver.find_element_by_name('password').send_keys(user_pw)
     try:
-
         element = driver.find_element_by_xpath("//button[@jsname='LgbsSe']")
         element.send_keys((Keys.ENTER))
-        
     except exceptions.StaleElementReferenceException as e:
         element = driver.find_element_by_xpath("//button[@jsname='LgbsSe']")
         element.send_keys((Keys.ENTER))
