@@ -4,10 +4,8 @@ from selenium.webdriver.common.keys import Keys
 from selenium.common import exceptions
 import os.path
 
-filename = os.path.join(os.path.dirname(__file__), './drivers/chromedriver.exe')
-
 # webdriver 객체생성
-driver = webdriver.Chrome(filename)
+driver = webdriver.Chrome('./drivers/chromedriver.exe')
 
 # url에 접근
 driver.get('https://leetcode.com/accounts/login/')
