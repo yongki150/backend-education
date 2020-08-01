@@ -6,11 +6,11 @@ from selenium.common import exceptions
 # webdriver 객체생성
 driver = webdriver.Chrome('./drivers/chromedriver.exe')
 
-# url에 접근
-driver.get('https://leetcode.com/accounts/login/')
-
-# google계정들어가기
 def login(user_id, user_pw):
+    # url에 접근
+    driver.get('https://leetcode.com/accounts/login/')
+
+    # google계정들어가기
     driver.find_element_by_xpath("//a[@data-icon='google-c']").send_keys(Keys.ENTER)
 
     # login창 뚫기
