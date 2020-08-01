@@ -2,7 +2,6 @@
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.common import exceptions
-import os.path
 
 # webdriver 객체생성
 driver = webdriver.Chrome('./drivers/chromedriver.exe')
