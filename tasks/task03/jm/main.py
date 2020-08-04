@@ -1,26 +1,24 @@
-import requests
-from bs4 import BeautifulSoup
 from typing import List
 
+import requests
+from bs4 import BeautifulSoup
+
 def get_notice() -> List[List[str]]:
-    req = requests.get('https://www.bible.ac.kr/ko/life/notice').text
-    soup = BeautifulSoup(req, 'html.parser')
-    lists = soup.select('ul li.tbody')
-    temp_list = []
-    item = 0
+    request = requests.get('https://www.bible.ac.kr/ko/life/notice').text
+    soup = BeautifulSoup(request, 'html.parser')
+    table_list = soup.select('ul li.tbody')
+    outline = []
 
-    for list in lists:
-        num = list.select_one('.loopnum').get_text()
-        title = list.select_one('.title').get_text()
-        name = list.select_one('.name').get_text()
-        date = list.select_one('.reg_date').get_text()
+    for element in table_list:
+        num = element.select_one('.loopnum').get_text()
+        title = element.select_one('.title').get_text()
+        name = element.select_one('.name').get_text()
+        date = element.select_one('.reg_date').get_text()
 
-        temp_list.append([num, title, name, date])
+        outline.append([num, title, name, date])
 
-    for item in temp_list:
-        print(item)
-
-    return item
+    return outline
 
 if __name__ == '__main__':
-    get_notice()
+    for item in get_notice():
+        print(item)
