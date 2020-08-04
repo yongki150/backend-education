@@ -1,6 +1,6 @@
+from typing import List
 import requests
 from bs4 import BeautifulSoup
-from typing import List
 
 def get_notice() -> List[List[str]]:
     req = requests.get("https://www.bible.ac.kr/ko/life/notice/list/1")
