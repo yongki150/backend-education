@@ -3,7 +3,7 @@ from typing import List
 import requests
 from bs4 import BeautifulSoup
 
-def parseUrl(url):
+def parse_url(url):
     req = requests.get(url)
     html = req.text
     soup = BeautifulSoup(html, 'html.parser')
@@ -13,7 +13,7 @@ def parseUrl(url):
 def get_notice_articles(page_num: int = 1) -> List[List[str]]:
     url = f"https://www.bible.ac.kr/ko/life/notice/list/{page_num}"
     articles = []
-    li_s = parseUrl(url).select('.tbody')
+    li_s = parse_url(url).select('.tbody')
 
     for li in li_s:
         link = li.select_one('.title > a')['href']
@@ -22,7 +22,7 @@ def get_notice_articles(page_num: int = 1) -> List[List[str]]:
         reg_date = li.select_one('.reg_date').text
 
         link = "https://www.bible.ac.kr" + link
-        article = parseUrl(link).select_one('.content').text
+        article = parse_url(link).select_one('.content').text
 
         title = title.replace("\n", "")
         article = article.replace("\n", "").replace("\xa0", "")
