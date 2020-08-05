@@ -1,7 +1,6 @@
-from typing import List
-
 import requests
 from bs4 import BeautifulSoup
+from typing import List
 
 def get_notice() -> List[List[str]]:
     req = requests.get("https://www.bible.ac.kr/ko/life/notice/list/1")
@@ -12,13 +11,13 @@ def get_notice() -> List[List[str]]:
     notice = []
 
     for li in li_s:
-        num = li.select_one('.loopnum')
-        title = li.select_one('.title')
-        name = li.select_one('.name')
-        reg_date = li.select_one('.reg_date')
+        num = li.select_one('.loopnum').text
+        title = li.select_one('.title').text
+        name = li.select_one('.name').text
+        reg_date = li.select_one('.reg_date').text
 
-        li_list = [num.text, title.text, name.text, reg_date.text]
-        li_list[1] = li_list[1].replace("\n", "")
+        title = title.replace("\n", "")
+        li_list = [num, title, name, reg_date]
 
         notice.append(li_list)
     return notice
