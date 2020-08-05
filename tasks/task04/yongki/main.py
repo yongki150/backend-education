@@ -1,4 +1,5 @@
 from typing import List
+import unicodedata
 
 import requests
 from bs4 import BeautifulSoup
@@ -25,7 +26,9 @@ def get_notice_articles(page_num: int = 1) -> List[List[str]]:
         article = parse_url(link).select_one('.content').text
 
         title = title.replace("\n", "")
-        article = article.replace("\n", "").replace("\xa0", "")
+
+        article = article.replace("\n", "")
+        article = unicodedata.normalize("NFKD", article)
 
         li_list = [link, title, name, reg_date, article]
         articles.append(li_list)
