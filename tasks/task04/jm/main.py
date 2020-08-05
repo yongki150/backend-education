@@ -1,3 +1,4 @@
+import unicodedata
 from typing import List
 
 import requests
@@ -25,7 +26,8 @@ def get_notice_articles(page_num: int = 1) -> List[List[str]]:
         date = element.select_one('.reg_date').get_text()
 
         article = target_page(url).select_one('.content').get_text()
-        article = article.strip().replace("\xa0", "")
+        article = article.strip()
+        article = unicodedata.normalize("NFKD", article)
 
         outline.append([url, title, name, date, article])
 
