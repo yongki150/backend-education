@@ -1,6 +1,7 @@
 from typing import List
 from typing import Dict
 
+import json
 import requests
 
 def get_movies_no_overlap(items_res) -> List[str]:
@@ -12,7 +13,7 @@ def get_movies_no_overlap(items_res) -> List[str]:
     return movies
 
 def get_timetable(items_res) -> Dict[str, List[List[str]]]:
-    dict = {}
+    info = {}
     for movie in get_movies_no_overlap(items_res):
         tables = []
         for item in items_res:
@@ -22,8 +23,8 @@ def get_timetable(items_res) -> Dict[str, List[List[str]]]:
                 table = [start_time, end_time]
                 tables.append(table)
         tables.sort()
-        dict[movie] = tables
-    return dict
+        info[movie] = tables
+    return info
 
 def get_konkuk_movie_info(date: str) -> Dict[str, List[List[str]]]:
     # 날짜를 바꿔도 url이 같다? post방식
@@ -32,9 +33,9 @@ def get_konkuk_movie_info(date: str) -> Dict[str, List[List[str]]]:
     param_list = {"MethodName": "GetPlaySequence", "channelType": "HO", "osType": "W",
                 "osVersion": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.105 Safari/537.36",
                 "playDate": date, "cinemaID": "1|1|1004", "representationMovieCode": ""}
-    parameter = {"paramList": str(param_list)}
-    res = requests.post(url, data= parameter).json()
 
+    parameter = {"paramList": json.dumps(param_list)}
+    res = requests.post(url, data= parameter).json()
     items_res = res['PlaySeqs']['Items']
 
     return get_timetable(items_res)
