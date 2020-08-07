@@ -1,13 +1,14 @@
 from typing import List
 from typing import Dict
-
+import time
 import json
 import requests
 
 def get_movies_no_overlap(items_res) -> List[str]:
     movies = []
+
     for item in items_res:
-        movie_name = item["MovieNameKR"]
+        movie_name = item.get("MovieNameKR")
         if movie_name not in movies:
             movies.append(movie_name)
     return movies
@@ -17,7 +18,7 @@ def get_timetable(items_res) -> Dict[str, List[List[str]]]:
     for movie in get_movies_no_overlap(items_res):
         tables = []
         for item in items_res:
-            if item["MovieNameKR"] == movie:
+            if item.get("MovieNameKR") == movie:
                 start_time = item["StartTime"]
                 end_time = item["EndTime"]
                 table = [start_time, end_time]
@@ -38,6 +39,7 @@ def get_konkuk_movie_info(date: str) -> Dict[str, List[List[str]]]:
     res = requests.post(url, data= parameter).json()
     items_res = res['PlaySeqs']['Items']
 
+    # start = time.time()
     return get_timetable(items_res)
 
 if __name__ == '__main__':
