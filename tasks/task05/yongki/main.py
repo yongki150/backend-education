@@ -1,6 +1,6 @@
 from typing import List
 from typing import Dict
-import time
+
 import json
 import requests
 
@@ -39,7 +39,6 @@ def get_konkuk_movie_info(date: str) -> Dict[str, List[List[str]]]:
     res = requests.post(url, data= parameter).json()
     items_res = res['PlaySeqs']['Items']
 
-    # start = time.time()
     return get_timetable(items_res)
 
 if __name__ == '__main__':
