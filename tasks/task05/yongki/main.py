@@ -1,33 +1,22 @@
 from typing import List
 from typing import Dict
-from collections import OrderedDict
-from itertools import repeat
+from typing import Set
+from collections import defaultdict
 
 import json
 import requests
 
-def get_movies_no_overlap(items_res):
-    movies = []
+def get_timetable(items_res) -> Dict[str, List[List[str]]]:
+    info = defaultdict(list)
 
     for item in items_res:
-        movies.append(item["MovieNameKR"])
-    set_movies = list(OrderedDict(zip(movies, repeat(None))))
+        name = item["MovieNameKR"]
+        start_time = item["StartTime"]
+        end_time = item["EndTime"]
+        info[name].append([start_time, end_time])
 
-    return set_movies
-
-def get_timetable(movies, items_res) -> Dict[str, List[List[str]]]:
-    info = {}
-
-    for movie in movies:
-        tables = []
-        for item in items_res:
-            if item["MovieNameKR"] == movie:
-                start_time = item["StartTime"]
-                end_time = item["EndTime"]
-                table = [start_time, end_time]
-                tables.append(table)
-        tables.sort()
-        info[movie] = tables
+    for key in info:
+        info[key].sort()
 
     return info
 
@@ -41,8 +30,7 @@ def get_konkuk_movie_info(date: str) -> Dict[str, List[List[str]]]:
     res = requests.post(url, data= parameter).json()
     items_res = res['PlaySeqs']['Items']
 
-    movies = get_movies_no_overlap(items_res)
-    return get_timetable(movies, items_res)
+    return get_timetable(items_res)
 
 if __name__ == '__main__':
     print(get_konkuk_movie_info("2020-08-08"))
