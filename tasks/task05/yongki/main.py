@@ -1,9 +1,8 @@
 from typing import List
 from typing import Dict
-
 from collections import defaultdict
-
 import json
+
 import requests
 
 
@@ -43,4 +42,4 @@ def get_konkuk_movie_info(date: str) -> Dict[str, List[List[str]]]:
 
 
 if __name__ == '__main__':
-    print(get_konkuk_movie_info("2020-08-08"))
+    print(get_konkuk_movie_info("2020-08-09"))
