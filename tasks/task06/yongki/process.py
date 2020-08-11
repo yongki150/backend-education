@@ -6,6 +6,7 @@ from concurrent.futures import ProcessPoolExecutor
 import requests
 from bs4 import BeautifulSoup
 
+
 def get_article_from_url(url):
     req = requests.get(url)
     html = req.text
