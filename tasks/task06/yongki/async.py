@@ -12,7 +12,6 @@ async def get_article_from_url(url):
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as res:
             html = await res.text()
-
     soup = BeautifulSoup(html, 'html.parser')
     title = soup.select_one('.header > h5').text
     content = soup.select_one('.content').text
@@ -35,17 +34,18 @@ async def get_notice_articles_async(page_num: int = 1) -> List[List[str]]:
     li_s = soup.select('.tbody')
 
     async_base_url = "https://www.bible.ac.kr"
-
-    tasks = [asyncio.create_task(get_article_from_url(
-        async_base_url + li.select_one('.title > a')['href'])) for li in li_s]
+    
+    tasks = []
+    for li in li_s:
+        async_url = async_base_url + li.select_one('.title > a')['href']
+        tasks.append(get_article_from_url(async_url))
 
     return await asyncio.gather(*tasks)
 
 
 if __name__ == '__main__':
     st = time.time()
-    loop = asyncio.get_event_loop()
-    articles = loop.run_until_complete(get_notice_articles_async(1))
+    articles = asyncio.run(get_notice_articles_async(1))
     for i in articles:
         print(i)
     print(time.time() - st)

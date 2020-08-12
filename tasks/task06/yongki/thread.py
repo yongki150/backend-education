@@ -34,15 +34,23 @@ def get_notice_articles_thread(page_num: int = 1) -> List[List[str]]:
 
     async_base_url = "https://www.bible.ac.kr"
 
+    results = []
     with ThreadPoolExecutor(max_workers=len(li_s)) as executor:
-        tasks = [executor.submit(get_article_from_url,
-                                 async_base_url + li.select_one('.title > a')['href']) for li in li_s]
+        futures = []
+        for li in li_s:
+            async_url = async_base_url + li.select_one('.title > a')['href']
+            futures.append(executor.submit(
+                get_article_from_url, async_url))
 
-    return tasks
+        for future in futures:
+            results.append(future.result())
+
+    return results
+
 
 if __name__ == '__main__':
     st = time.time()
     articles = get_notice_articles_thread(1)
     for i in articles:
-        print(i.result())
+        print(i)
     print(time.time() - st)
