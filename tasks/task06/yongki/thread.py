@@ -35,7 +35,7 @@ def get_notice_articles_thread(page_num: int = 1) -> List[List[str]]:
     async_base_url = "https://www.bible.ac.kr"
 
     results = []
-    with ThreadPoolExecutor(max_workers=len(li_s)) as executor:
+    with ThreadPoolExecutor() as executor:
         futures = []
         for li in li_s:
             async_url = async_base_url + li.select_one('.title > a')['href']
