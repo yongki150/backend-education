@@ -10,25 +10,17 @@ def get_notice_articles(page):
     request = requests.get(page).text
     soup = BeautifulSoup(request, 'html.parser')
 
-    table_list = soup.select('ul li.tbody')
-    outline = []
+    title = soup.select_one('.header > h5').get_text()
+    title = title.strip()
 
-    for element in table_list:
-        url = element.select_one('div ul.black a')['href']
-        url = "https://www.bible.ac.kr" + url
+    name = soup.select_one('.name span[data-role="name"]').get_text()
+    date = soup.select_one('time').get_text()
 
-        title = element.select_one('.title').get_text()
-        title = title.strip()
+    article = soup.select_one('.content').get_text()
+    article = article.strip()
+    article = unicodedata.normalize("NFKD", article)
 
-        name = element.select_one('.name').get_text()
-        date = element.select_one('.reg_date').get_text()
-
-        article = element.select_one('.content').get_text()
-        article = article.strip()
-        article = unicodedata.normalize("NFKD", article)
-        outline.append([url, title, name, date, article])
-
-    return outline
+    return [title, name, date, article]
 
 def get_notice_articles_process(page_num: int = 1) -> List[List[str]]:
     page = f"https://www.bible.ac.kr/ko/life/notice/list/{page_num}"
@@ -39,11 +31,11 @@ def get_notice_articles_process(page_num: int = 1) -> List[List[str]]:
 
     result = []
     futures = []
-    target_page = "https://www.bible.ac.kr"
+    base_page = "https://www.bible.ac.kr"
 
     with ProcessPoolExecutor() as executor:
         for links in lists:
-            target_page = target_page + links.select_one('div ul.black a')['href']
+            target_page = base_page + links.select_one('div ul.black a')['href']
             result.append(executor.submit(get_notice_articles, target_page))
 
         for future in futures:
