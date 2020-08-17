@@ -14,7 +14,7 @@ async def get_article_notice(page):
 
     soup = BeautifulSoup(link, 'html.parser')
 
-    url = soup.select('link[rel="canonical"]')
+    url = soup.select_one('link[rel="canonical"]')['href']
 
     title = soup.select_one('.header > h5').get_text()
     title = title.strip()
@@ -37,8 +37,8 @@ async def get_notice_articles_async(page_num: int = 1) -> List[List[str]]:
 
     base_page = "https://www.bible.ac.kr"
 
-    for sel in lists:
-        target_page = base_page + sel.select_one('span.title a')['href']
+    for li in lists:
+        target_page = base_page + li.select_one('span.title a')['href']
         result.append(get_article_notice(target_page))
 
     return await asyncio.gather(*result)

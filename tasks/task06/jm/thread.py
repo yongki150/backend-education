@@ -10,6 +10,8 @@ def get_notice_articles(page):
     request = requests.get(page).text
     soup = BeautifulSoup(request, 'html.parser')
 
+    url = soup.select_one('link[rel="canonical"]')['href']
+
     title = soup.select_one('.header > h5').get_text()
     title = title.strip()
 
@@ -20,7 +22,7 @@ def get_notice_articles(page):
     article = article.strip()
     article = unicodedata.normalize("NFKD", article)
 
-    return [title, name, date, article]
+    return [url, title, name, date, article]
 
 def get_notice_articles_thread(page_num: int = 1) -> List[List[str]]:
     page = f"https://www.bible.ac.kr/ko/life/notice/list/{page_num}"
@@ -30,7 +32,6 @@ def get_notice_articles_thread(page_num: int = 1) -> List[List[str]]:
     lists = soup.select('ul li.tbody')
 
     result = []
-    futures = []
     base_page = "https://www.bible.ac.kr"
 
     with ThreadPoolExecutor() as executor:
@@ -38,8 +39,6 @@ def get_notice_articles_thread(page_num: int = 1) -> List[List[str]]:
             target_page = base_page + links.select_one('span.title a')['href']
             result.append(executor.submit(get_notice_articles, target_page))
 
-        for future in futures:
-            result.append(future.result())
     return result
 
 if __name__ == '__main__':
