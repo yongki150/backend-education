@@ -1,8 +1,9 @@
 from typing import Dict, List, Optional
 from dataclasses import dataclass
 import asyncio
+import time
 
-import aiohttp
+import requests
 from bs4 import BeautifulSoup
 
 
@@ -20,31 +21,35 @@ LOGIN_INFO = {
 
 async def get_courses(semester: Optional[SemesterData] = None) -> Dict[str, List[str]]:
     login_url = "https://lms.bible.ac.kr/login.php"
-    course_url = f"https://lms.bible.ac.kr/local/ubion/user/?year={semester}&semester={semester}"
-    print(course_url)
-    async with aiohttp.ClientSession(raise_for_status=True) as session:
-        await session.post(login_url, data=LOGIN_INFO)
+    course_url = f"https://lms.bible.ac.kr/local/ubion/user/?year={semester.year}&semester={semester.semester}"
 
-        async with session.get(course_url) as course_req:
-            html = await course_req.text()
+    session = requests.Session()
+    login_req = session.post(login_url, data=LOGIN_INFO)
+    login_req.raise_for_status()  # 200이 아니면 error 발생
 
-    soup = BeautifulSoup(html, 'html.parser')
+    # print(session.cookies.get_dict())
 
+    course_req = session.get(course_url)
+    course_req.raise_for_status()
+
+    soup = BeautifulSoup(course_req.text, 'html.parser')
     course_lists = soup.select('.my-course-lists > tr')
     tasks = {}
     for course in course_lists:
         title = course.select_one('.coursefullname').text
         tutor = course.select('td')[2].text
         tutee = course.select('td')[3].text
-        tasks.setdefault(title, [tutor, tutee])
+        tasks[title] = [tutor, tutee]
 
     return tasks
 
 
 async def main():
+    st = time.time()
     print("default")
-    print(await get_courses())
+    print(await get_courses(SemesterData(2020, 20)))
     print("-" * 30)
-    print(await get_courses(SemesterData(2020, 2)))
+    print(await get_courses(SemesterData(2020, 10)))
+    print(time.time() - st)
 
 asyncio.run(main())
