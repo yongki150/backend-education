@@ -4,7 +4,7 @@ import json
 import requests
 
 def get_konkuk_movie_info(date: str) -> Dict[str, List[List[str]]]:
-    item_list = []
+    item_list = {}
     url = "https://www.lottecinema.co.kr/LCWS/Ticketing/TicketingData.aspx"
     form_data = {
         "MethodName":"GetPlaySequence",
@@ -20,19 +20,21 @@ def get_konkuk_movie_info(date: str) -> Dict[str, List[List[str]]]:
     }
 
     parameters = {"paramList": json.dumps(form_data)}
-    response = requests.post(url, data = parameters).json()
+    response = requests.post(url, data=parameters).json()
     movies_response = response['PlaySeqs']['Items']
 
+    table = []
     for item in movies_response:
         title = item["MovieNameKR"]
         start = item["StartTime"]
         end = item["EndTime"]
 
-        if [title] not in item_list:
-            item_list.append([title])
-        item_list.append([start, end])
+        table.append([start, end])
+        table.sort()
+
+        item_list[title] = table
 
     return item_list
 
 if __name__ == '__main__':
-    print(get_konkuk_movie_info("2020-08-17"))
+    print(get_konkuk_movie_info("2020-08-19"))
