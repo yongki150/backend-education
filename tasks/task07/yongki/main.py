@@ -21,7 +21,12 @@ LOGIN_INFO = {
 
 async def get_courses(semester: Optional[SemesterData] = None) -> Dict[str, List[str]]:
     login_url = "https://lms.bible.ac.kr/login.php"
-    course_url = f"https://lms.bible.ac.kr/local/ubion/user/?year={semester.year}&semester={semester.semester}"
+
+    if semester is None:
+        course_url = "https://lms.bible.ac.kr/local/ubion/user/"
+    else:
+        course_url = f"https://lms.bible.ac.kr/local/ubion/user/?year={semester.year}&semester={semester.semester}"
+
 
     session = requests.Session()
     login_req = session.post(login_url, data=LOGIN_INFO)
@@ -47,7 +52,7 @@ async def get_courses(semester: Optional[SemesterData] = None) -> Dict[str, List
 async def main():
     st = time.time()
     print("default")
-    print(await get_courses(SemesterData(2020, 20)))
+    print(await get_courses())
     print("-" * 30)
     print(await get_courses(SemesterData(2020, 10)))
     print(time.time() - st)
