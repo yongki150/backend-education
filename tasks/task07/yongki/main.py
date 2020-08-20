@@ -61,6 +61,5 @@ async def main():
     print(await get_courses(SemesterData(2020, 10)))
 
     print(time.time() - st)
-
-loop = asyncio.get_event_loop()
-loop.run_until_complete(main())
+    
+asyncio.run(main())
