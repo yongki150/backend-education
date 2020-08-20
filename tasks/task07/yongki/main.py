@@ -3,7 +3,7 @@ from dataclasses import dataclass
 import asyncio
 import time
 
-import requests
+import aiohttp
 from bs4 import BeautifulSoup
 
 
@@ -23,23 +23,20 @@ async def get_courses(semester: Optional[SemesterData] = None) -> Dict[str, List
     try:
         login_url = "https://lms.bible.ac.kr/login.php"
 
-        if semester is None:
-            course_url = "https://lms.bible.ac.kr/local/ubion/user/"
-        else:
-            course_url = f"https://lms.bible.ac.kr/local/ubion/user/?year={semester.year}&semester={semester.semester}"
+        async with aiohttp.ClientSession() as session:
+            login_req = await session.post(login_url, data=LOGIN_INFO)
 
-        with requests.Session() as session:
-            login_req = session.post(login_url, data=LOGIN_INFO)
-            login_cookie = login_req.cookies.get_dict()
-            # print(login_cookie)
+            if semester is None:
+                course_url = f"{str(login_req.url)}local/ubion/user/"
+            else:
+                course_url = f"{str(login_req.url)}/local/ubion/user/?year={semester.year}&semester={semester.semester}"
 
-            course_req = session.get(course_url)
+            course_req = await session.get(course_url)
+            if course_req.status == 404:
+                raise ValueError
+            html = await course_req.text()
 
-        # 쿠키가 있는데 로그인정보가 실패??
-        if login_cookie:
-            raise ValueError
-
-        soup = BeautifulSoup(course_req.text, 'html.parser')
+        soup = BeautifulSoup(html, 'html.parser')
         course_lists = soup.select('.my-course-lists > tr')
 
         tasks = {}
@@ -65,4 +62,5 @@ async def main():
 
     print(time.time() - st)
 
-asyncio.run(main())
+loop = asyncio.get_event_loop()
+loop.run_until_complete(main())
