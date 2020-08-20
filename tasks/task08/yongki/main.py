@@ -12,16 +12,30 @@ routes = web.RouteTableDef()
 
 @routes.get('/sum')
 async def handle(request):
-    data = request.query
+    try:
+        data = request.query
+        response_obj = {}
+        if not data:
+            print("입력이 필요합니다.")
+            response_obj = {"stats": "failed", "message": "need input"}
 
-    if not data:
-        print("입력이 필요합니다.")
-        response_obj = {"stats": "failed", "message": "need input"}
-    else:
-        query_sum = sum(int(val) for key, val in data.items())
-        response_obj = {"status": "success", "result": query_sum}
-    return web.Response(text=json.dumps(response_obj), status=200)
+            return web.Response(text=json.dumps(response_obj), status=404)
 
+        else:
+            query_sum = 0
+            for key, val in data.items():
+                if val.isalpha():
+                    response_obj = {"status": "failed", "message": "type is not int"}
+                    return web.Response(text=json.dumps(response_obj), status=500)
+
+                elif val.isdecimal():
+                    query_sum += int(val)
+                    response_obj = {"status": "success", "result": query_sum}
+
+            return web.Response(text=json.dumps(response_obj), status=200)
+
+    except Exception as e:
+        print("message: " + str(e))
 
 app = web.Application()
 app.add_routes(routes)
