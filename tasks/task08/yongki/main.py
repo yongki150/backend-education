@@ -13,30 +13,26 @@ routes = web.RouteTableDef()
 @routes.get('/sum')
 async def handle(request):
     try:
-        data = request.query        
-        if not data:
-            print("입력이 필요합니다.")
-            response_obj = {"stats": "failed", "message": "need input"}
+        data = request.query
 
+        if not data:
+            response_obj = {"stats": "failed", "message": "need input"}
             return web.Response(text=json.dumps(response_obj), status=400)
 
         else:
             query_sum = 0
-
             for val in data.values():
-                if val.isalpha():
-                    response_obj = {"status": "failed", "message": "type is not decimal"}
-                    return web.Response(text=json.dumps(response_obj), status=400)
-
-                if val.isdecimal():
-                    query_sum += int(val)
-                    continue
+                if float(val):
+                    query_sum += float(val)
 
             response_obj = {"status": "success", "result": query_sum}
             return web.Response(text=json.dumps(response_obj), status=200)
 
+    except ValueError as e:  # 영문, 한글, 특수문자에 대한 처리
+        response_obj = {"status": "failed", "message(ValueError)": f"{str(e)}"}
+        return web.Response(text=json.dumps(response_obj), status=400)
     except Exception as e:
-        print("message: " + str(e))
+        print(f"message: {str(e)}")
 
 
 @routes.get('/{wrong_path}', name="sum")
