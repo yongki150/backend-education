@@ -22,13 +22,12 @@ async def handle(request):
         else:
             query_sum = 0
             for val in data.values():
-                if float(val):
-                    query_sum += float(val)
+                query_sum += float(val)
 
             response_obj = {"status": "success", "result": query_sum}
             return web.Response(text=json.dumps(response_obj), status=200)
 
-    except ValueError as e:  # 영문, 한글, 특수문자에 대한 처리
+    except ValueError:  # 영문, 한글, 특수문자에 대한 처리
         response_obj = {"status": "failed", "message(ValueError)": "please input number"}
         return web.Response(text=json.dumps(response_obj), status=400)
     except Exception:
