@@ -29,10 +29,10 @@ async def handle(request):
             return web.Response(text=json.dumps(response_obj), status=200)
 
     except ValueError as e:  # 영문, 한글, 특수문자에 대한 처리
-        response_obj = {"status": "failed", "message(ValueError)": f"{str(e)}"}
+        response_obj = {"status": "failed", "message(ValueError)": "please input number"}
         return web.Response(text=json.dumps(response_obj), status=400)
-    except Exception as e:
-        print(f"message: {str(e)}")
+    except Exception:
+        print("message: unexpected error, contact admin")
 
 
 @routes.get('/{wrong_path}', name="sum")
