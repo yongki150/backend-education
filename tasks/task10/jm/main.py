@@ -6,12 +6,16 @@ from biblebot import IntranetAPI, KbuAPI
 
 async def get_intranet_info():
     #IntranetAPI.Login
-    resp = await IntranetAPI.Login.fetch("chojam301", "durrkdcp0398")
+    resp = await IntranetAPI.Login.fetch("", "")
     result = IntranetAPI.Login.parse(resp)
     cookie = result.data["cookies"]
     print(result)
 
     #IntranetAPI.StudentPhoto
+    resp = await IntranetAPI.StudentPhoto.fetch(cookies=cookie, sid="")
+    'sid에 학번입력'
+    result = IntranetAPI.StudentPhoto.parse(resp)
+    print(result)
 
     #IntranetAPI.Chapel
     resp = await IntranetAPI.Chapel.fetch(cookies=cookie)
