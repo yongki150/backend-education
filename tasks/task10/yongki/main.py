@@ -17,9 +17,9 @@ async def use_intranet_api():
     try:
         # Login
         response = await IntranetAPI.Login.fetch(INFO["ID"], INFO["passWD"])
-        if response.reason != "Found":
-            raise AttributeError("맞는 ID와 비밀번호를 입력하세요.")
 
+        if response.reason != "Found":
+            raise ValueError("맞는 ID와 비밀번호를 입력하세요.")
         result = IntranetAPI.Login.parse(response)
         cookie = result.data["cookies"]
         print(result)
@@ -44,8 +44,8 @@ async def use_intranet_api():
         result = IntranetAPI.Course.parse(resp)
         print(result)
 
-    except AttributeError as e:
-        print("오류 원인: ", str(e))
+    except ValueError as e:
+        print("오류 원인:", str(e))
 
 
 async def use_kbu_api():
