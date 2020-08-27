@@ -1,7 +1,6 @@
 import asyncio
 
-from biblebot import IntranetAPI
-from biblebot import KbuAPI
+from biblebot import IntranetAPI, KbuAPI
 
 INFO = {
     "ID": "",
@@ -10,6 +9,7 @@ INFO = {
     "sid": "201504009",
     "page": "1",
     "searchKeyword": None,
+
 }
 
 
@@ -17,6 +17,9 @@ async def use_intranet_api():
     try:
         # Login
         response = await IntranetAPI.Login.fetch(INFO["ID"], INFO["passWD"])
+        if response.reason != "Found":
+            raise AttributeError("맞는 ID와 비밀번호를 입력하세요.")
+
         result = IntranetAPI.Login.parse(response)
         cookie = result.data["cookies"]
         print(result)
@@ -41,8 +44,8 @@ async def use_intranet_api():
         result = IntranetAPI.Course.parse(resp)
         print(result)
 
-    except AttributeError:
-        print("맞는 ID와 비밀번호를 입력하세요.")
+    except AttributeError as e:
+        print("오류 원인: ", str(e))
 
 
 async def use_kbu_api():
