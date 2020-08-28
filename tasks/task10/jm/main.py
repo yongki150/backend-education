@@ -9,7 +9,7 @@ async def get_intranet_info():
     resp = await IntranetAPI.Login.fetch("", "")
     if resp.status == 200:
         print("ID와 PW를 확인해주세요")
-        return ValueError
+        return
     result = IntranetAPI.Login.parse(resp)
     cookie = result.data["cookies"]
     print(resp.status)
