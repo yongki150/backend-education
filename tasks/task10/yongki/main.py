@@ -14,45 +14,36 @@ INFO = {
 
 
 async def use_intranet_api():
-    try:
-        try:
-            # Login
-            response = await IntranetAPI.Login.fetch(INFO["ID"], INFO["passWD"])
+    # Login
+    response = await IntranetAPI.Login.fetch(INFO["ID"], INFO["passWD"])
 
-            if response.reason != "Found":
-                raise ValueError("맞는 ID와 비밀번호를 입력하세요.")
-            
-            result = IntranetAPI.Login.parse(response)
-            INFO['cookie'] = result.data["cookies"]
-            print(result)
+    if response.reason != "Found":
+        print("맞는 ID와 비밀번호를 입력하세요.")
+        return
 
-        except ValueError as e:
-            print("오류 원인:", str(e))
+    result = IntranetAPI.Login.parse(response)
+    INFO['cookie'] = result.data["cookies"]
+    print(result)
 
-        # Get StudentPhoto
-        resp = await IntranetAPI.StudentPhoto.fetch(cookies=INFO['cookie'], sid=INFO["sid"])
-        result = IntranetAPI.StudentPhoto.parse(resp)
-        print(result)
+    # Get StudentPhoto
+    resp = await IntranetAPI.StudentPhoto.fetch(cookies=INFO['cookie'], sid=INFO["sid"])
+    result = IntranetAPI.StudentPhoto.parse(resp)
+    print(result)
 
-        # Get Chapel
-        resp = await IntranetAPI.Chapel.fetch(cookies=INFO['cookie'], semester=INFO["semester"])
-        result = IntranetAPI.Chapel.parse(resp)
-        print(result)
+    # Get Chapel
+    resp = await IntranetAPI.Chapel.fetch(cookies=INFO['cookie'], semester=INFO["semester"])
+    result = IntranetAPI.Chapel.parse(resp)
+    print(result)
 
-        # Get Timetable
-        resp = await IntranetAPI.Timetable.fetch(cookies=INFO['cookie'], semester=INFO["semester"])
-        result = IntranetAPI.Timetable.parse(resp)
-        print(result)
+    # Get Timetable
+    resp = await IntranetAPI.Timetable.fetch(cookies=INFO['cookie'], semester=INFO["semester"])
+    result = IntranetAPI.Timetable.parse(resp)
+    print(result)
 
-        # Get Course
-        resp = await IntranetAPI.Course.fetch(cookies=INFO['cookie'], semester=INFO["semester"])
-        result = IntranetAPI.Course.parse(resp)
-        print(result)
-
-    except exceptions.ParsingError as e:
-        print("오류 원인:", str(e))
-    except Exception as e:
-        print("오류 원인:", str(e))
+    # Get Course
+    resp = await IntranetAPI.Course.fetch(cookies=INFO['cookie'], semester=INFO["semester"])
+    result = IntranetAPI.Course.parse(resp)
+    print(result)
 
 
 async def use_kbu_api():
@@ -72,6 +63,7 @@ async def use_kbu_api():
 async def main():
     print("인트라넷API사용 중입니다.")
     await use_intranet_api()
+    print("=" * 30)
     print("kbuAPI사용 중입니다.")
     await use_kbu_api()
 
