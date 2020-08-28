@@ -1,6 +1,6 @@
 import asyncio
 
-from biblebot import IntranetAPI, KbuAPI, exceptions
+from biblebot import IntranetAPI, KbuAPI
 
 INFO = {
     "ID": "",
