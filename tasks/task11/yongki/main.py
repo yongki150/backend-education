@@ -42,9 +42,9 @@ async def handle_login(request):
         return web.Response(text=json.dumps(resp), status=400)
 
 
-@routes.post('/chapel')
+@routes.get('/chapel')
 async def handle_chapel(request):
-    data = await request.json()
+    data = request.query
     enter_key = int(data["key"])
 
     if enter_key in INFO.keys():
@@ -62,9 +62,9 @@ async def handle_chapel(request):
         return web.Response(text=json.dumps(resp), status=401)
 
 
-@routes.post('/timetable')
-async def handle_chapel(request):
-    data = await request.json()
+@routes.get('/timetable')
+async def handle_timetable(request):
+    data = request.query
     enter_key = int(data["key"])
 
     if enter_key in INFO.keys():
@@ -82,9 +82,9 @@ async def handle_chapel(request):
         return web.Response(text=json.dumps(resp), status=401)
 
 
-@routes.post('/course')
-async def handle_chapel(request):
-    data = await request.json()
+@routes.get('/course')
+async def handle_course(request):
+    data = request.query
     enter_key = int(data["key"])
 
     if enter_key in INFO.keys():
