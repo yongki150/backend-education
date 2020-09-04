@@ -1,4 +1,5 @@
 import json
+import random
 
 from aiohttp import web
 from biblebot import IntranetAPI
@@ -10,7 +11,6 @@ server = {
 }
 
 INFO = {}
-key = 0
 
 routes = web.RouteTableDef()
 
@@ -18,7 +18,7 @@ routes = web.RouteTableDef()
 @routes.post('/login')
 async def handle_login(request):
     try:
-        global key
+        key = str(random.random())
         data = await request.json()
         resp_login = await IntranetAPI.Login.fetch(data["id"], data["passwd"])
 
@@ -31,7 +31,6 @@ async def handle_login(request):
         # print(INFO)
 
         resp = {"status": "success", "message": f"welcome! your enter key is {key}"}
-        key += 1
         return web.Response(text=json.dumps(resp), status=200)
 
     except KeyError:
@@ -45,7 +44,7 @@ async def handle_login(request):
 @routes.get('/chapel')
 async def handle_chapel(request):
     data = request.query
-    enter_key = int(data["key"])
+    enter_key = data["key"]
 
     if enter_key in INFO.keys():
         resp_chapel = await IntranetAPI.Chapel.fetch(
@@ -65,7 +64,7 @@ async def handle_chapel(request):
 @routes.get('/timetable')
 async def handle_timetable(request):
     data = request.query
-    enter_key = int(data["key"])
+    enter_key = data["key"]
 
     if enter_key in INFO.keys():
         resp_chapel = await IntranetAPI.Timetable.fetch(
@@ -85,7 +84,7 @@ async def handle_timetable(request):
 @routes.get('/course')
 async def handle_course(request):
     data = request.query
-    enter_key = int(data["key"])
+    enter_key = data["key"]
 
     if enter_key in INFO.keys():
         resp_chapel = await IntranetAPI.Course.fetch(
