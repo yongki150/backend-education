@@ -1,5 +1,6 @@
 import json
-import random
+import string
+import secrets
 
 from aiohttp import web
 from biblebot import IntranetAPI
@@ -15,10 +16,25 @@ INFO = {}
 routes = web.RouteTableDef()
 
 
+async def send_success_msg(result):
+    resp = {"status": "success", "message": str(result.data)}
+    return web.Response(text=json.dumps(resp, ensure_ascii=False), status=200)
+
+
+async def send_failed_msg(msg, status):
+    resp = {"status": "failed", "message": msg}
+    return web.Response(text=json.dumps(resp), status=status)
+
+
 @routes.post('/login')
 async def handle_login(request):
     try:
-        key = str(random.random())
+        alphabet = string.ascii_letters + string.digits
+        key = ''.join(secrets.choice(alphabet) for i in range(8))
+
+        while key in INFO:
+            key = ''.join(secrets.choice(alphabet) for i in range(8))
+
         data = await request.json()
         resp_login = await IntranetAPI.Login.fetch(data["id"], data["passwd"])
 
@@ -27,18 +43,17 @@ async def handle_login(request):
             return web.Response(text=json.dumps(resp), status=400)
 
         result = IntranetAPI.Login.parse(resp_login)
-        INFO.setdefault(key, result.data["cookies"])
+        INFO[key] = result.data["cookies"]
         # print(INFO)
 
         resp = {"status": "success", "message": f"welcome! your enter key is {key}"}
         return web.Response(text=json.dumps(resp), status=200)
 
     except KeyError:
-        resp = {"status": "failed", "message": "incorrect key"}
-        return web.Response(text=json.dumps(resp), status=400)
+        return send_failed_msg("incorrect key", 400)
+
     except json.decoder.JSONDecodeError:
-        resp = {"stats": "failed", "message": "incorrect json format"}
-        return web.Response(text=json.dumps(resp), status=400)
+        return send_failed_msg("incorrect json format", 400)
 
 
 @routes.get('/chapel')
@@ -46,7 +61,7 @@ async def handle_chapel(request):
     data = request.query
     enter_key = data["key"]
 
-    if enter_key in INFO.keys():
+    if enter_key in INFO:
         resp_chapel = await IntranetAPI.Chapel.fetch(
             cookies=INFO[enter_key],
             semester=data["semester"]
@@ -54,11 +69,9 @@ async def handle_chapel(request):
         result = IntranetAPI.Chapel.parse(resp_chapel)
         print(result)
 
-        resp = {"status": "success", "message": str(result.data)}
-        return web.Response(text=json.dumps(resp, ensure_ascii=False), status=200)
+        return await send_success_msg(result)
     else:
-        resp = {"status": "failed", "message": "login first"}
-        return web.Response(text=json.dumps(resp), status=401)
+        return await send_failed_msg("login first", 401)
 
 
 @routes.get('/timetable')
@@ -66,7 +79,7 @@ async def handle_timetable(request):
     data = request.query
     enter_key = data["key"]
 
-    if enter_key in INFO.keys():
+    if enter_key in INFO:
         resp_chapel = await IntranetAPI.Timetable.fetch(
             cookies=INFO[enter_key],
             semester=data["semester"]
@@ -74,11 +87,9 @@ async def handle_timetable(request):
         result = IntranetAPI.Timetable.parse(resp_chapel)
         print(result)
 
-        resp = {"status": "success", "message": str(result.data)}
-        return web.Response(text=json.dumps(resp, ensure_ascii=False), status=200)
+        return await send_success_msg(result)
     else:
-        resp = {"status": "failed", "message": "login first"}
-        return web.Response(text=json.dumps(resp), status=401)
+        return await send_failed_msg("login first", 401)
 
 
 @routes.get('/course')
@@ -86,7 +97,7 @@ async def handle_course(request):
     data = request.query
     enter_key = data["key"]
 
-    if enter_key in INFO.keys():
+    if enter_key in INFO:
         resp_chapel = await IntranetAPI.Course.fetch(
             cookies=INFO[enter_key],
             semester=data["semester"]
@@ -94,11 +105,9 @@ async def handle_course(request):
         result = IntranetAPI.Course.parse(resp_chapel)
         print(result)
 
-        resp = {"status": "success", "message": str(result.data)}
-        return web.Response(text=json.dumps(resp, ensure_ascii=False), status=200)
+        return await send_success_msg(result)
     else:
-        resp = {"status": "failed", "message": "login first"}
-        return web.Response(text=json.dumps(resp), status=401)
+        return await send_failed_msg("login first", 401)
 
 
 @routes.get('/{wrong_path}')
