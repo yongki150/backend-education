@@ -1,5 +1,3 @@
-import json
-import string
 import secrets
 
 from aiohttp import web
@@ -16,44 +14,36 @@ INFO = {}
 routes = web.RouteTableDef()
 
 
-async def send_success_msg(result):
-    resp = {"status": "success", "message": str(result.data)}
-    return web.Response(text=json.dumps(resp, ensure_ascii=False), status=200)
+@web.middleware
+async def error_middleware(request, handler) -> web.StreamResponse:
+    try:
+        response = await handler(request)
 
+        if response.status == 200:
+            return response
 
-async def send_failed_msg(msg, status):
-    resp = {"status": "failed", "message": msg}
-    return web.Response(text=json.dumps(resp), status=status)
+    except web.HTTPException as ex:
+        return web.json_response({"status": "failed", "reason": ex.reason, "status_code": ex.status_code})
 
 
 @routes.post('/login')
 async def handle_login(request):
-    try:
-        alphabet = string.ascii_letters + string.digits
-        key = ''.join(secrets.choice(alphabet) for i in range(8))
+    key = secrets.token_urlsafe(16)
 
-        while key in INFO:
-            key = ''.join(secrets.choice(alphabet) for i in range(8))
+    while key in INFO:
+        key = secrets.token_urlsafe(16)
 
-        data = await request.json()
-        resp_login = await IntranetAPI.Login.fetch(data["id"], data["passwd"])
+    data = await request.json()
+    resp_login = await IntranetAPI.Login.fetch(data["id"], data["passwd"])
 
-        if resp_login.reason != "Found":
-            resp = {"status": "failed", "message": "incorrect login data" }
-            return web.Response(text=json.dumps(resp), status=400)
+    if resp_login.reason != "Found":
+        raise web.HTTPBadRequest
 
-        result = IntranetAPI.Login.parse(resp_login)
-        INFO[key] = result.data["cookies"]
-        # print(INFO)
+    result = IntranetAPI.Login.parse(resp_login)
+    INFO[key] = result.data["cookies"]
 
-        resp = {"status": "success", "message": f"welcome! your enter key is {key}"}
-        return web.Response(text=json.dumps(resp), status=200)
-
-    except KeyError:
-        return send_failed_msg("incorrect key", 400)
-
-    except json.decoder.JSONDecodeError:
-        return send_failed_msg("incorrect json format", 400)
+    data_msg = f"welcome! your enter key is {key}"
+    return web.json_response({"status": "success", "message": data_msg})
 
 
 @routes.get('/chapel')
@@ -67,11 +57,10 @@ async def handle_chapel(request):
             semester=data["semester"]
         )
         result = IntranetAPI.Chapel.parse(resp_chapel)
-        print(result)
 
-        return await send_success_msg(result)
+        return web.json_response({"status": "success", "message": result.data})
     else:
-        return await send_failed_msg("login first", 401)
+        raise web.HTTPUnauthorized
 
 
 @routes.get('/timetable')
@@ -85,11 +74,10 @@ async def handle_timetable(request):
             semester=data["semester"]
         )
         result = IntranetAPI.Timetable.parse(resp_chapel)
-        print(result)
 
-        return await send_success_msg(result)
+        return web.json_response({"status": "success", "message": result.data})
     else:
-        return await send_failed_msg("login first", 401)
+        raise web.HTTPUnauthorized
 
 
 @routes.get('/course')
@@ -103,18 +91,12 @@ async def handle_course(request):
             semester=data["semester"]
         )
         result = IntranetAPI.Course.parse(resp_chapel)
-        print(result)
 
-        return await send_success_msg(result)
+        return web.json_response({"status": "success", "message": result.data})
     else:
-        return await send_failed_msg("login first", 401)
+        raise web.HTTPUnauthorized
 
-
-@routes.get('/{wrong_path}')
-async def handle_wrong_path(request):
-    return web.Response(text="{} is wrong path".format(request.match_info['wrong_path']), status=404)
-
-app = web.Application()
+app = web.Application(middlewares=[error_middleware])
 app.add_routes(routes)
 
 if __name__ == '__main__':
