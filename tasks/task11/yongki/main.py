@@ -1,4 +1,5 @@
 import secrets
+import json
 
 from aiohttp import web
 from biblebot import IntranetAPI
@@ -15,15 +16,19 @@ routes = web.RouteTableDef()
 
 
 @web.middleware
-async def error_middleware(request, handler) -> web.StreamResponse:
+async def error_middleware(request, handler):
     try:
-        response = await handler(request)
+        resp = await handler(request)
 
-        if response.status == 200:
-            return response
+    except KeyError:
+        return web.json_response({"status": "failed", "reason": "정확한 로그인 정보를 입력하세요", "status_code": 400})
+    except json.JSONDecodeError:
+        return web.json_response({"status": "failed", "reason": "json 형식에 맞게 입력하세요", "status_code": 400})
+    except web.HTTPUnauthorized as e:
+        return web.json_response({"status": "failed", "reason": str(e), "status_code": e.status_code})
 
-    except web.HTTPException as ex:
-        return web.json_response({"status": "failed", "reason": ex.reason, "status_code": ex.status_code})
+    else:
+        return web.json_response({"status": "success", "content": resp})
 
 
 @routes.post('/login')
@@ -37,13 +42,12 @@ async def handle_login(request):
     resp_login = await IntranetAPI.Login.fetch(data["id"], data["passwd"])
 
     if resp_login.reason != "Found":
-        raise web.HTTPBadRequest
+        raise KeyError
 
     result = IntranetAPI.Login.parse(resp_login)
     INFO[key] = result.data["cookies"]
 
-    data_msg = f"welcome! your enter key is {key}"
-    return web.json_response({"status": "success", "message": data_msg})
+    return key
 
 
 @routes.get('/chapel')
@@ -57,8 +61,8 @@ async def handle_chapel(request):
             semester=data["semester"]
         )
         result = IntranetAPI.Chapel.parse(resp_chapel)
+        return result.data
 
-        return web.json_response({"status": "success", "message": result.data})
     else:
         raise web.HTTPUnauthorized
 
@@ -74,8 +78,8 @@ async def handle_timetable(request):
             semester=data["semester"]
         )
         result = IntranetAPI.Timetable.parse(resp_chapel)
+        return result.data
 
-        return web.json_response({"status": "success", "message": result.data})
     else:
         raise web.HTTPUnauthorized
 
@@ -91,8 +95,8 @@ async def handle_course(request):
             semester=data["semester"]
         )
         result = IntranetAPI.Course.parse(resp_chapel)
+        return result.data
 
-        return web.json_response({"status": "success", "message": result.data})
     else:
         raise web.HTTPUnauthorized
 
