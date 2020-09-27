@@ -3,11 +3,11 @@ from selenium.webdriver.common.keys import Keys
 import time
 def login(user_id, user_pw):
     dirver.get("https://leetcode.com/accounts/login/")
-    dirver.find_element_by_class_name("link__Mcl7").click() #ok
-    print("되고있는거가?  ", dirver)
-    dirver.find_element_by_xpath('//input[@type="email"]').send_keys(user_id)
+    dirver.implicitly_wait(1)
+    dirver.find_element_by_xpath('//*[@id="app"]/div/div[2]/div/div[2]/div/div/div/div[2]/div/a[1]').send_keys(Keys.ENTER)
+    dirver.find_element_by_xpath('//*[@id="identifierId"]').send_keys(user_id)
     dirver.find_element_by_xpath('//*[@id="identifierNext"]').click()
-    dirver.find_element_by_xpath('//input[@type="password"]').send_keys(user_pw)
+    dirver.find_element_by_xpath('//*[@id="password"]/div[1]/div/div[1]/input').send_keys(user_pw)
     dirver.find_element_by_xpath('//*[@id="passwordNext"]').click()
 
 
