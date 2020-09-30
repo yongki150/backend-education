@@ -1,6 +1,7 @@
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 import time
+
 def login(user_id, user_pw):
     dirver.get("https://leetcode.com/accounts/login/")
     dirver.find_element_by_xpath('//*[@id="app"]/div/div[2]/div/div[2]/div/div/div/div[2]/div/a[1]').send_keys(Keys.ENTER)
@@ -18,3 +19,7 @@ dirver = webdriver.Chrome("C:\\Users\\kooki\\Desktop\\bot\\backend-education\\ta
 dirver.implicitly_wait(3)
 login(user_id, user_pw)
 time.sleep(50)
+
+
+
+
