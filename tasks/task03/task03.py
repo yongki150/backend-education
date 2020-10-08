@@ -1,4 +1,5 @@
 import requests
+
 from typing import List
 from bs4 import BeautifulSoup
 
@@ -11,7 +12,7 @@ def get_notice(page) -> List[List[str]]:
         text = parent.text
         text_list.append(text.replace("\n", " "))
     if len(text_list) == 0:
-        return "잘못된 링크입니다."
+        print("잘못된 입력입니다")
     return text_list
 
 
