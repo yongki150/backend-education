@@ -1,6 +1,7 @@
 from typing import Dict, List, Optional
 from dataclasses import dataclass
 import json
+import time
 
 import aiohttp
 import asyncio
@@ -29,7 +30,7 @@ def make_data_list(start_ind : int, text: str) -> [str, str, str]:
 
     return [resultname, professor, num]
 
-
+    
 async def get_courses(semester: Optional[SemesterData] = None) -> Dict[str, List[str]]:
     ##세션 데이터 받아옴.
     return_data = dict() #type dict
@@ -38,27 +39,24 @@ async def get_courses(semester: Optional[SemesterData] = None) -> Dict[str, List
         'username' : userinfo['name'],
         'password' : userinfo['password'],
     }
-    header = {
-        'Referer' : 'https://lms.bible.ac.kr/login.php',
-        'User-Agent' : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.111 Safari/537.36',
-    }
     ##세션 요청함.
-    with requests.session() as s:
-        s.post('https://lms.bible.ac.kr/login.php', headers = header, data = data)
-        url = 'https://lms.bible.ac.kr/local/ubion/user/'
-        if semester != None:
-            url += '?year=' + str(semester[0]) + '&semester=' + str(semester[1])
-        #강의 페이지 접속
-        spost = s.get(url)
-        soup = bs(spost.text, 'html.parser')
-        snames = soup.select('tbody > tr')
-        for sname in snames:
-            start_ind = sname.text.find(' ')
-            data = make_data_list(start_ind + 1, sname.text)
-            return_data[data[0]] = [data[1], data[2]]
+    async with aiohttp.ClientSession() as s:
+        async with s.post('https://lms.bible.ac.kr/login.php', data = data):
+            url = 'https://lms.bible.ac.kr/local/ubion/user/'
+            if semester:
+                url += '?year=' + str(semester[0]) + '&semester=' + str(semester[1])
+            #강의 페이지 접속
+            async with s.get(url) as spost:
+                text = await spost.text()
+    soup = bs(text, 'html.parser')
+    snames = soup.select('tbody > tr')
+    for sname in snames:
+        start_ind = sname.text.find(' ')
+        data = make_data_list(start_ind + 1, sname.text)
+        return_data[data[0]] = [data[1], data[2]]
 
     return return_data
-
+    
 
 def setting_user_info() -> Dict:
     userinfo = dict()
@@ -72,4 +70,5 @@ async def main_():
     to_json = json.dumps(dic_data) #json 형식으로 변경
     print(json.loads(to_json)) #json파일 인코딩
 
-asyncio.run(main_())
+if __name__ == "__main__":
+    asyncio.run(main_())
