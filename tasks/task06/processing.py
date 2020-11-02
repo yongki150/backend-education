@@ -29,7 +29,7 @@ def get_notice_articles(page_num) -> List[List[str]]:
     result_text = []
     soup = get_url_return_soup('https://www.bible.ac.kr/ko/life/notice')
     tbodys = soup.select('li.tbody')
-    with ProcessPoolExecutor(max_workers= 4) as executor:
+    with ProcessPoolExecutor() as executor:
         for each_tbody in tbodys:
             link = each_tbody.select('span')[1].contents[1]['href'] #url
             result_text.append(executor.submit(get_main_list, link))
