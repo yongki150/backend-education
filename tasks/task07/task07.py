@@ -41,13 +41,13 @@ async def get_courses(semester: Optional[SemesterData] = None) -> Dict[str, List
     }
     ##세션 요청함.
     async with aiohttp.ClientSession() as s:
-        async with s.post('https://lms.bible.ac.kr/login.php', data = data):
-            url = 'https://lms.bible.ac.kr/local/ubion/user/'
-            if semester:
-                url += '?year=' + str(semester[0]) + '&semester=' + str(semester[1])
-            #강의 페이지 접속
-            async with s.get(url) as spost:
-                text = await spost.text()
+        await s.post('https://lms.bible.ac.kr/login.php', data = data)
+        url = 'https://lms.bible.ac.kr/local/ubion/user/'
+        if semester:
+            url += '?year=' + str(semester[0]) + '&semester=' + str(semester[1])
+        #강의 페이지 접속
+        async with s.get(url) as spost:
+            text = await spost.text()
     soup = bs(text, 'html.parser')
     snames = soup.select('tbody > tr')
     for sname in snames:
