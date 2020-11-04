@@ -25,7 +25,7 @@ async def sum_(request):  # handler
         if len(keydatas) == 0:
             raise ValueError
         for key in request.query.values():
-            ##key값 중 숫자가 아닌 수가 있을 경우,
+            # key값 중 숫자가 아닌 수가 있을 경우
             if key.isdigit() != True:
                 raise TypeError
             result += int(key)
