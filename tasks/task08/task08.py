@@ -2,22 +2,24 @@ import asyncio
 from aiohttp import web
 import json
 
+routes = web.RouteTableDef()
+
 
 def __init__(loop):
     app = web.Application(loop=loop)
-    # post part
-    app.router.add_post("/sum", sum_)
+    app.add_routes(routes)
     return app
 
 
 def main():
     loop = asyncio.get_event_loop()
     app = __init__(loop)
-
     web.run_app(app)
 
 
+@routes.get("/sum")
 async def sum_(request):  # handler
+    print(request)
     try:
         result = 0
         keydatas = request.query.values()
@@ -37,6 +39,11 @@ async def sum_(request):  # handler
     except ValueError:
         response_obj = {"status": "failed", "message": "Input sum data"}
         return web.Response(text=json.dumps(response_obj), status=500)
+
+
+@routes.get("/{name}", name="sum")
+async def Wrong_path_error(request):
+    return web.Response(text="wrong path! {}".format(request.match_info["name"]))
 
 
 if __name__ == "__main__":
