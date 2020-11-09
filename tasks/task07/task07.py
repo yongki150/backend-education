@@ -37,20 +37,20 @@ def make_data_list(start_ind: int, text: str) -> [str, str, str]:
 
 
 async def get_courses(semester) -> Dict[str, List[str]]:
-    ##세션 데이터 받아옴.
+    # 세션 데이터 받아옴.
     return_data = dict()  # type dict
     userinfo = setting_user_info()
     data = {
         "username": userinfo["name"],
         "password": userinfo["password"],
     }
-    ##세션 요청함.
-    url = ""
+    # 세션 요청함.
     async with aiohttp.ClientSession() as s:
         await s.post("https://lms.bible.ac.kr/login.php", data=data)
         url = "https://lms.bible.ac.kr/local/ubion/user"
         if semester:
-            url += "/?year=" + str(semester[0]) + "&semester=" + str(semester[1])
+            url += "/?year=" + str(semester[0]) + \
+                "&semester=" + str(semester[1])
         # 강의 페이지 접속
         spost = await s.get(url)
         text = await spost.text()
