@@ -1,11 +1,11 @@
 import json
 
-import asyncio
+import secrets
 from aiohttp import web
 from biblebot import IntranetAPI
 
 routers = web.RouteTableDef()
-data = {}
+data = dict()
 
 
 def __init__():
@@ -38,23 +38,26 @@ async def error_middleware(req, handler):
 @routers.post('/login')
 async def post_login(req):
     user_data = {'id': None, 'pw': None}
+    user_secrets_url = secrets.token_urlsafe(32)
+
     for key, val in req.query.items():
         user_data[key] = val
     resp = await IntranetAPI.Login.fetch(user_data['id'], user_data['pw'])
     result = IntranetAPI.Login.parse(resp)
     try:
-        data['cookie'] = result.data['cookies']
+        data[user_secrets_url] = result.data['cookies']
     except AttributeError:
         raise
-    return web.Response(text="login_success: " + str(data))
+    return web.Response(text= user_secrets_url)
 
 
 @routers.get('/chapel')
 async def get_chapel(req):
-    if len(data) != 0:
+    if data[req.query_string] is not None:
         try:
-            resp = await IntranetAPI.Chapel.fetch(cookies=data.get('cookie'), semester="20201")
+            resp = await IntranetAPI.Chapel.fetch(cookies=data[req.query_string], semester="20201")
             result = IntranetAPI.Chapel.parse(resp)
+            print(result)
             return web.Response(text=json.dumps(result.data), status=400)
         except web.HTTPForbidden:
             raise
@@ -63,9 +66,9 @@ async def get_chapel(req):
 
 @routers.get('/timetable')
 async def get_timetable(req):
-    if len(data) != 0:
+    if data[req.query_string] is not None:
         try:
-            resp = await IntranetAPI.Timetable.fetch(cookies=data.get('cookie'), semester="20201")
+            resp = await IntranetAPI.Timetable.fetch(cookies=data[req.query_string], semester="20201")
             result = IntranetAPI.Timetable.parse(resp)
             return web.Response(text=json.dumps(result.data), status=400)
         except web.HTTPForbidden:
@@ -74,9 +77,9 @@ async def get_timetable(req):
 
 @routers.get('/course')
 async def get_course(req):
-    if len(data) != 0:
+    if data[req.query_string] is not None:
         try:
-            resp = await IntranetAPI.Course.fetch(cookies=data.get('cookie'), semester="20201")
+            resp = await IntranetAPI.Course.fetch(cookies=data[req.query_string], semester="20201")
             result = IntranetAPI.Course.parse(resp)
             return web.Response(text=json.dumps(result.data), status=400)
         except web.HTTPForbidden:
